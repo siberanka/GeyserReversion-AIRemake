@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 GeyserMC. http://geysermc.org
+ * Copyright (c) 2019-2026 GeyserMC. http://geysermc.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,29 +26,21 @@
 package oxy.geyser.reversion.handler.init;
 
 import io.netty.channel.Channel;
-import io.netty.channel.DefaultEventLoopGroup;
-import io.netty.util.concurrent.DefaultThreadFactory;
-import lombok.Getter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.cloudburstmc.netty.channel.raknet.config.RakChannelOption;
 import org.cloudburstmc.protocol.bedrock.BedrockPeer;
 import org.cloudburstmc.protocol.bedrock.BedrockServerSession;
-import org.cloudburstmc.protocol.bedrock.netty.initializer.BedrockServerInitializer;
 import org.geysermc.geyser.GeyserImpl;
-import org.geysermc.geyser.network.GeyserBedrockPeer;
-import org.geysermc.geyser.network.InvalidPacketHandler;
+import org.geysermc.geyser.network.GeyserServerInitializer;
+import org.geysermc.geyser.network.bedrock.InvalidPacketHandler;
 import org.geysermc.geyser.session.GeyserSession;
 import oxy.geyser.reversion.handler.TranslatorPacketHandler;
 
-public class TranslatorServerInitializer extends BedrockServerInitializer {
-    private final GeyserImpl geyser;
+public class TranslatorServerInitializer extends GeyserServerInitializer {
     private final boolean rakCookiesEnabled;
     // There is a constructor that doesn't require inputting threads, but older Netty versions don't have it
-    @Getter
-    private final DefaultEventLoopGroup eventLoopGroup = new DefaultEventLoopGroup(0, new DefaultThreadFactory("Geyser player thread"));
-
     public TranslatorServerInitializer(GeyserImpl geyser, boolean rakCookiesEnabled) {
-        this.geyser = geyser;
+        super(geyser, "Geyser player thread");
         this.rakCookiesEnabled = rakCookiesEnabled;
     }
 
@@ -64,7 +56,7 @@ public class TranslatorServerInitializer extends BedrockServerInitializer {
     public void initSession(@NonNull BedrockServerSession bedrockServerSession) {
         try {
             bedrockServerSession.setLogging(this.geyser.config().debugMode());
-            GeyserSession session = new GeyserSession(this.geyser, bedrockServerSession, this.eventLoopGroup.next());
+            GeyserSession session = new GeyserSession(this.geyser, bedrockServerSession, this.getEventLoopGroup().next());
 
             if (!bedrockServerSession.isSubClient()) {
                 Channel channel = bedrockServerSession.getPeer().getChannel();
@@ -79,8 +71,4 @@ public class TranslatorServerInitializer extends BedrockServerInitializer {
         }
     }
 
-    @Override
-    protected BedrockPeer createPeer(Channel channel) {
-        return new GeyserBedrockPeer(channel, this::createSession);
-    }
 }

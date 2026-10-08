@@ -1,6 +1,6 @@
 # Licensing and third-party notices
 
-Compatibility modifications: siberanka, 2026-09-15. Original copyrights,
+Compatibility modifications: siberanka, 2026-09-15 through 2026-10-08. Original copyrights,
 license texts, contributor history and notices are retained. No warranty is
 provided. Redistribution is permitted subject to the respective licenses;
 this fork does not claim original authorship or impose additional restrictions.
@@ -10,7 +10,7 @@ this fork does not claim original authorship or impose additional restrictions.
 | GeyserReversion | oxy / oryxel1; AnarchadiaMC fork and contributors | GPL-3.0, root `LICENSE` |
 | Ouranos translation engine | Blackjack200; oryxel1 fork and contributors | AGPL-3.0, `Ouranos/LICENSE` |
 | Ouranos compatibility patch and RecipeTranslator | siberanka; based on Ouranos | AGPL-3.0, `patches/ouranos-compat.patch`, `patches/ouranos-src/` |
-| Copied Geyser packet handlers/initializer | Copyright 2019-2022 GeyserMC; current adaptations remain attributed | MIT, full notices in copied Java headers and `META-INF/licenses/Geyser-MIT.txt` |
+| Copied Geyser packet handlers/initializer | Copyright 2019-2026 GeyserMC; current adaptations remain attributed | MIT, full notices in copied Java headers and `META-INF/licenses/Geyser-MIT.txt` |
 | ClassLoaderPriorityUtil adaptation | Copyright 2021-2025 RK_01 / RaphiMC and ViaProxy contributors | GPL-3.0-or-later, full source notice retained |
 | BedrockData resource collection | IdotClub/BedrockData and original data contributors | LGPL-2.1 collection; per-version CC0 notices in `Ouranos/src/main/resources/vanilla/` take precedence for those data sets |
 | Item/block upgrade schemas | pmmp/BedrockItemUpgradeSchema, pmmp/BedrockBlockUpgradeSchema contributors | CC0-1.0, `schema/LICENSE` and `block_schema/LICENSE` |

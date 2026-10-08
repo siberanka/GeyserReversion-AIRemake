@@ -12,7 +12,7 @@ class BridgeMappingAuditTest {
         return new DefinitionRegistry<>() {
             @Override public ItemDefinition getDefinition(int id) { return null; }
             @Override public ItemDefinition getDefinition(String identifier) {
-                var info = ItemTypeDictionary.getInstance(944).getEntries().get(identifier);
+                var info = ItemTypeDictionary.getInstance(1001).getEntries().get(identifier);
                 return new SimpleItemDefinition(identifier, info.runtime_id()
                         + (corrupt && identifier.equals("minecraft:chest") ? 1 : 0), info.component_based());
             }
@@ -20,12 +20,12 @@ class BridgeMappingAuditTest {
         };
     }
     @Test void matchingRuntimeIdsPass() {
-        assertEquals(ItemTypeDictionary.getInstance(944).getEntries().size(), BridgeMappingAudit.verifyItems(944, definitions(false)));
+        assertEquals(ItemTypeDictionary.getInstance(1001).getEntries().size(), BridgeMappingAudit.verifyItems(1001, definitions(false)));
     }
     @Test void mismatchedRuntimeIdFailsClosed() {
-        assertThrows(IllegalStateException.class, () -> BridgeMappingAudit.verifyItems(944, definitions(true)));
+        assertThrows(IllegalStateException.class, () -> BridgeMappingAudit.verifyItems(1001, definitions(true)));
     }
     @Test void missingMappingsFailClosed() {
-        assertThrows(IllegalStateException.class, () -> BridgeMappingAudit.verifyItems(944, null));
+        assertThrows(IllegalStateException.class, () -> BridgeMappingAudit.verifyItems(1001, null));
     }
 }

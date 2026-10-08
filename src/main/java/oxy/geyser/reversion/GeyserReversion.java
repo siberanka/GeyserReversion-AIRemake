@@ -18,7 +18,7 @@ import org.cloudburstmc.netty.channel.raknet.config.RakChannelOption;
 import org.cloudburstmc.netty.channel.raknet.config.RakServerCookieMode;
 import org.cloudburstmc.netty.handler.codec.raknet.server.RakServerOfflineHandler;
 import org.cloudburstmc.protocol.bedrock.codec.BedrockCodec;
-import org.cloudburstmc.protocol.bedrock.codec.v898.Bedrock_v898;
+import org.cloudburstmc.protocol.bedrock.codec.v1001.Bedrock_v1001;
 import org.geysermc.event.subscribe.Subscribe;
 import org.geysermc.geyser.GeyserImpl;
 import org.geysermc.geyser.api.event.lifecycle.GeyserPostInitializeEvent;
@@ -26,11 +26,12 @@ import org.geysermc.geyser.api.event.lifecycle.GeyserPreInitializeEvent;
 import org.geysermc.geyser.api.extension.Extension;
 import org.geysermc.geyser.api.extension.ExtensionLogger;
 import org.geysermc.geyser.configuration.GeyserConfig;
-import org.geysermc.geyser.network.GameProtocol;
-import org.geysermc.geyser.network.netty.Bootstraps;
-import org.geysermc.geyser.network.netty.GeyserServer;
-import org.geysermc.geyser.network.netty.handler.RakConnectionRequestHandler;
-import org.geysermc.geyser.network.netty.handler.RakPingHandler;
+import org.geysermc.geyser.network.bedrock.GameProtocol;
+import org.geysermc.geyser.network.BedrockPingHandler;
+import org.geysermc.geyser.network.RaknetServer;
+import org.geysermc.geyser.network.bedrock.raknet.Bootstraps;
+import org.geysermc.geyser.network.bedrock.raknet.RakConnectionRequestHandler;
+import org.geysermc.geyser.network.bedrock.raknet.RakPingHandler;
 import org.geysermc.mcprotocollib.network.helper.TransportHelper;
 import oxy.geyser.reversion.config.Config;
 import oxy.geyser.reversion.config.ConfigLoader;
@@ -50,7 +51,7 @@ public class GeyserReversion implements Extension {
 
     public static ExtensionLogger LOGGER;
 
-    public static BedrockCodec BRIDGE_GEYSER_CODEC = CodecUtil.rebuildCodec(Bedrock_v898.CODEC);
+    public static BedrockCodec BRIDGE_GEYSER_CODEC = CodecUtil.rebuildCodec(Bedrock_v1001.CODEC);
 
     private static final TransportHelper.TransportType TRANSPORT = TransportHelper.TRANSPORT_TYPE;
 
@@ -101,7 +102,11 @@ public class GeyserReversion implements Extension {
             bedrockThreadCount = Math.max(1, SystemPropertyUtil.getInt("io.netty.eventLoopThreads", NettyRuntime.availableProcessors() * 2));
         }
 
-        final EventLoopGroup group = TRANSPORT.eventLoopGroupFactory().apply(Bootstraps.isReusePortAvailable() ? Integer.getInteger("Geyser.ListenCount", 1) : 1, new DefaultThreadFactory("GeyserServer", true));
+        final RaknetServer raknetServer = geyser.getGeyserServer();
+        final Field listenCountField = RaknetServer.class.getDeclaredField("listenCount");
+        listenCountField.setAccessible(true);
+        final int listenCount = (int) listenCountField.get(raknetServer);
+        final EventLoopGroup group = TRANSPORT.eventLoopGroupFactory().apply(listenCount, new DefaultThreadFactory("GeyserServer", true));
         final EventLoopGroup childGroup = TRANSPORT.eventLoopGroupFactory().apply(bedrockThreadCount, new DefaultThreadFactory("GeyserServerChild", true));
 
         int rakPacketLimit = positivePropOrDefault("Geyser.RakPacketLimit", DEFAULT_PACKET_LIMIT);
@@ -131,28 +136,28 @@ public class GeyserReversion implements Extension {
 
         Bootstraps.setupBootstrap(bootstrap, TRANSPORT);
 
-        final Field field = GeyserServer.class.getDeclaredField("bootstrapFutures");
+        final Field field = RaknetServer.class.getDeclaredField("bootstrapFutures");
         field.setAccessible(true);
 
         final GeyserConfig config = geyser.config();
         final ChannelFuture[] futures = (ChannelFuture[]) field.get(geyser.getGeyserServer());
         for (int i = 0; i < futures.length; i++) {
-            ChannelFuture future = bootstrap.bind(new InetSocketAddress(config.bedrock().address(), config.bedrock().port()));
+            ChannelFuture future = bootstrap.bind(new InetSocketAddress(config.bedrock().address(), config.bedrock().raknetPort()));
             modifyHandlers(future);
             futures[i] = future;
         }
 
         Bootstraps.allOf(futures).join();
 
-        final Field groupField = GeyserServer.class.getDeclaredField("group");
+        final Field groupField = RaknetServer.class.getDeclaredField("group");
         groupField.setAccessible(true);
         groupField.set(geyser.getGeyserServer(), group);
 
-        final Field childGroupField = GeyserServer.class.getDeclaredField("childGroup");
+        final Field childGroupField = RaknetServer.class.getDeclaredField("childGroup");
         childGroupField.setAccessible(true);
         childGroupField.set(geyser.getGeyserServer(), childGroup);
 
-        final Field playerGroupField = GeyserServer.class.getDeclaredField("playerGroup");
+        final Field playerGroupField = RaknetServer.class.getDeclaredField("playerGroup");
         playerGroupField.setAccessible(true);
         playerGroupField.set(geyser.getGeyserServer(), serverInitializer.getEventLoopGroup());
     }
@@ -169,7 +174,7 @@ public class GeyserReversion implements Extension {
                     .addBefore(RakServerOfflineHandler.NAME, RakConnectionRequestHandler.NAME,
                             new RakConnectionRequestHandler(GeyserImpl.getInstance().getGeyserServer()))
                     .addAfter(RakServerOfflineHandler.NAME, RakPingHandler.NAME,
-                            new RakPingHandler(GeyserImpl.getInstance().getGeyserServer()));
+                            new RakPingHandler(new BedrockPingHandler(GeyserImpl.getInstance())));
         });
     }
 

@@ -82,15 +82,34 @@ diff --git a/src/main/java/com/github/blackjack200/ouranos/ProtocolInfo.java b/s
 index bb639b5..6056bf0 100644
 --- a/src/main/java/com/github/blackjack200/ouranos/ProtocolInfo.java
 +++ b/src/main/java/com/github/blackjack200/ouranos/ProtocolInfo.java
-@@ -107,7 +107,6 @@ public final class ProtocolInfo {
+@@ -86,6 +86,8 @@ import org.cloudburstmc.protocol.bedrock.codec.v898.Bedrock_v898;
+ import org.cloudburstmc.protocol.bedrock.codec.v898.Bedrock_v898;
+ import org.cloudburstmc.protocol.bedrock.codec.v924.Bedrock_v924;
+ import org.cloudburstmc.protocol.bedrock.codec.v944.Bedrock_v944;
++import org.cloudburstmc.protocol.bedrock.codec.v975.Bedrock_v975;
++import org.cloudburstmc.protocol.bedrock.codec.v1001.Bedrock_v1001;
+-
++
+ import java.util.*;
+ import java.util.concurrent.ConcurrentHashMap;
+@@ -101,14 +103,14 @@ public final class ProtocolInfo {
+     static {
+         // 1.26.x
++        addPacketCodec(Bedrock_v1001.CODEC, 251);
++        addPacketCodec(Bedrock_v975.CODEC, 251);
+         addPacketCodec(Bedrock_v944.CODEC, 251);
+         addPacketCodec(Bedrock_v924.CODEC, 251);
+-
++
+         // 1.21.x
          addPacketCodec(Bedrock_v898.CODEC, 251);
          addPacketCodec(Bedrock_v860.CODEC, 251);
          addPacketCodec(Bedrock_v859.CODEC, 251);
 -        addPacketCodec(Bedrock_v844.CODEC, 251);
 -
-+
          addPacketCodec(Bedrock_v844.CODEC, 241, new Protocol844to827(), null);
          addPacketCodec(Bedrock_v827.CODEC, 241);
+         addPacketCodec(Bedrock_v819.CODEC, 231);
 diff --git a/src/main/java/com/github/blackjack200/ouranos/data/AbstractMapping.java b/src/main/java/com/github/blackjack200/ouranos/data/AbstractMapping.java
 index d2e49ea..9e1cb68 100644
 --- a/src/main/java/com/github/blackjack200/ouranos/data/AbstractMapping.java

@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'oxy.geyser.reversion'
-version = '1.0.5'
+version = '1.0.6'
 
 java {
     toolchain {
@@ -68,7 +68,7 @@ dependencies {
     correspondingDependencySources 'org.cloudburstmc.protocol:bedrock-codec:3.0.0.Beta12-20260721.182844-29:sources'
     correspondingDependencySources 'org.cloudburstmc.protocol:common:3.0.0.Beta12-20260721.182844-30:sources'
     correspondingDependencySources 'org.cloudburstmc.protocol:bedrock-connection:3.0.0.Beta12-20260721.182844-30:sources'
-    compileOnly("org.geysermc.geyser:core:2.11.2-20260910.131131-9") {
+    compileOnly("org.geysermc.geyser:core:2.11.3-20261006.093555-15") {
         exclude group: "com.google.code.gson", module: "gson"
     }
     // Geyser provides this at runtime; the extension directly uses its listener options.
@@ -78,7 +78,7 @@ dependencies {
 
     // Use Ouranos shadowJar from submodule build output
     implementation(files("build/ouranos-src/build/libs/ouranos-1.0-all.jar"))
-    testImplementation("org.geysermc.geyser:core:2.11.2-20260910.131131-9")
+    testImplementation("org.geysermc.geyser:core:2.11.3-20261006.093555-15")
     testImplementation(platform("org.junit:junit-bom:5.11.4"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")

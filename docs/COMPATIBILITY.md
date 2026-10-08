@@ -1,98 +1,105 @@
-# Bedrock compatibility — 15 September 2026
+# Bedrock compatibility — 8 October 2026
 
 This is an experimental backward-compatibility extension, not a replacement
-for Geyser's supported-version policy. A registered codec means a packet
-format exists; it does **not** certify full gameplay.
+for Geyser's supported-version policy. A registered codec proves that a packet
+format is available; it does **not** certify flawless client gameplay.
 
 | Client versions | Route | Verification / support status |
 | --- | --- | --- |
-| Bedrock 26.0–26.45 | Native Geyser 2.11.2 build 1235 | Official Geyser range; no Ouranos item/block rewriting |
-| Bedrock 1.21.110–1.21.132 | Ouranos, protocols 859 / 860 / 898 → 944 | Newly included legacy codecs and matching data; experimental gameplay |
-| Bedrock 1.16.100–1.21.100 | Ouranos, protocols 419–844 → 944 | Local wire/semantic regression coverage; experimental gameplay |
-| Bedrock 1.12–1.16.40 | Ouranos, protocols 361 / 388 / 389 / 390 / 407 / 408 → 944 | Upstream partially playable; not production-certified |
-| Unregistered intermediate protocols, previews, beta clients, future releases | Rejected unless the installed Geyser supports them natively | No guessed protocol/schema mappings |
+| Bedrock 26.30–26.52 | Native Geyser 2.11.3 build 1249 | Official current range; protocols 1001, 2168, 2169 and 2193 |
+| Bedrock 26.0–26.23 | Ouranos, protocols 924 / 944 / 975 → 1001 | Legacy translation added because these codecs left current Geyser; experimental gameplay |
+| Bedrock 1.21.110–1.21.132 | Ouranos, protocols 859 / 860 / 898 → 1001 | Codec, mapping, packet and local negotiation coverage; experimental gameplay |
+| Bedrock 1.16.100–1.21.100 | Ouranos, protocols 419–844 → 1001 | Local wire/semantic regression coverage; experimental gameplay |
+| Bedrock 1.12–1.16.40 | Ouranos, protocols 361 / 388 / 389 / 390 / 407 / 408 → 1001 | Upstream partially playable; not production-certified |
+| Unregistered protocols, previews, beta clients and future releases | Rejected unless installed Geyser supports them natively | No guessed protocol or schema aliases |
 
-Native protocols at the reference build: 924, 944, 975, 1001, 2168 (active
-26.40–26.44 hotfix codec), 2169 (26.45). The bridge is **944 / 26.10**,
-which has real mappings in both Geyser and Ouranos. Latest mappings must
-never be aliased to an unrelated legacy bridge.
+The reference Geyser build's native protocols are 1001 (26.30–26.34), 2168
+(26.40–26.44), 2169 (26.45) and 2193 (26.50–26.52). Protocol **1001 / 26.30**
+is the newest genuine codec shared by current Geyser and the patched Ouranos
+catalog, so it is selected as the translation bridge.
 
-Legacy registered protocols (54 including the shared native bridge codecs):
+Legacy registered protocols (56 including the shared native bridge codec):
 361, 388, 389, 390, 407, 408, 419, 422, 428, 431, 440, 448, 465, 471, 475,
 486, 503, 527, 534, 544, 545, 554, 557, 560, 567, 568, 575, 582, 589, 594,
 618, 622, 630, 649, 662, 671, 685, 686, 712, 729, 748, 766, 776, 786, 800,
-818, 819, 827, 844, 859, 860, 898, 924, 944.
+818, 819, 827, 844, 859, 860, 898, 924, 944, 975, 1001.
 
-## What this release fixes
+## What 1.0.6 updates
 
-- A distinct mutable codec helper per session, on both sides of the shaded
-  protocol boundary; players no longer share item/block/helper registries.
-- A real shared bridge instead of aliasing protocol 2169's tables to 898.
-- The internal bridge's negotiated item dictionary and full block palette
-  are initialized from actual Geyser mappings and checked at startup. Legacy
-  output dictionaries remain separate; custom bridge blocks are not added twice.
-- Deterministic nearest-older resource lookup; duplicate protocol 844 removed.
-- Concrete recipe ingredients/results, furnace and brewing IDs are translated;
-  ordinary recipes are no longer cleared or advertised with modern numeric IDs.
-- Creative contents/groups are translated rather than emptied.
-- Serverbound equipment and embedded item-use transactions use bridge IDs;
-  embedded stack requests receive the same slot normalization as standalone ones.
-- Downstream callback packet IDs are taken from the server codec, not the client.
-- Legacy authentication honors Geyser's online/offline/Floodgate mode rather
-  than forcing every initialized client into Microsoft device-code login.
-- Native clients also respect minimum/blocked protocol configuration.
-- Critical translation failures are reported and disconnect explicitly instead
-  of leaving players in silently broken inventory/movement states.
+- Moves `GameProtocol` to Geyser 2.11.3's
+  `org.geysermc.geyser.network.bedrock` package and checks every other direct
+  Geyser internal reference against exact build 1249.
+- Adapts listener replacement to `RaknetServer`, `GeyserServerInitializer`,
+  the current RakNet bootstrap handlers and the current `raknetPort` setting.
+- Adds real Ouranos codecs 975 and 1001 and raises the shared translation
+  bridge from 944 to 1001. No unrelated modern mapping is aliased to it.
+- Preserves per-session mutable helpers and initializes the bridge's item
+  dictionary and full block palette from actual Geyser mappings.
+- Keeps concrete recipe ingredients/results, furnace/brewing identifiers,
+  creative contents, equipment and embedded item-use transactions translated.
+- Preserves Geyser online, offline and Floodgate authentication selection.
+- Preserves the existing extension configuration keys and defaults.
+
+## Local evidence
+
+The [October validation report](VALIDATION-2026-10.md) records the exact build,
+hashes and results. In summary:
+
+- 485 local tests passed with no failures or skips.
+- Every one of the 56 legacy codecs completed helper-isolation and chest
+  open/close wire round-trips; movement crossed both shaded codec boundaries.
+- Crafting, inventories, held items, embedded chest interactions, runtime item
+  dictionaries and full block palettes were checked semantically.
+- Geyser 2.11.3-b1249 loaded the extension through
+  `GeyserPostInitializeEvent`, selected bridge 1001, and verified 1,941 item
+  runtime IDs plus 17,112 block states.
+- 37 distinct supported protocol families (legacy and native, protocol 554+)
+  completed real local RakNet/network-settings negotiation on UDP 19132.
+- The built extension contains no direct BungeeCord, Velocity, Spigot, Paper,
+  Floodgate or Geyser platform implementation dependency.
 
 ## Remaining limitations
 
-Real Bedrock clients and an authenticated Java backend are required to prove
-walking, jumping, chest transfers, crafting output consumption and reconnect
-behavior. Synthetic packet tests cannot prove UI behavior, inventory
-authoritative-state reconciliation, anti-cheat compatibility or packet ordering
-under real network loss. No such real-client certification is claimed here.
+Synthetic packets and local unauthenticated negotiation cannot prove what only
+a real Bedrock client and authenticated Java backend can prove: walking and
+rubber-banding behavior, chest UI state reconciliation, crafting output
+consumption, inventory loss/duplication, reconnects, anti-cheat interaction and
+backend switches under real latency. No such end-to-end certification is
+claimed.
 
-Old clients cannot render/use all modern blocks/items, new mobs, UI containers,
-smithing templates, trims or protocol features. Ouranos may polyfill absent
-items. Education-only material reducers are not advertised. Pre-1.19.50 recipe
-tag/Molang descriptors cannot be represented faithfully, so only those recipes
-are omitted instead of replacing them with an arbitrary ingredient or clearing
-the whole recipe book. Pre-1.20 smithing recipes are omitted.
-These restrictions do not imply that every modern server mechanic can be
-backported flawlessly.
+Old clients cannot represent every modern block, item, mob, UI container,
+smithing template, trim or protocol feature. Ouranos may polyfill absent items.
+Education-only material reducers are not advertised. Pre-1.19.50 recipe
+tag/Molang descriptors cannot be represented faithfully, so only affected
+recipes are omitted rather than replacing them with arbitrary ingredients or
+clearing the recipe book. Pre-1.20 smithing recipes are omitted.
 
-The newest shared bridge is 26.10, not 26.45: legacy clients do not gain a
-full implementation of all 26.45 features. Native 26.0–26.45 clients continue
-to use Geyser's own codecs/mappings. Updating Geyser beyond this reference
-build requires repeating the tests; if no shared bridge remains, initialization
-fails before replacing the native listener.
+The bridge is 26.30, not 26.52: translated clients do not gain a full
+implementation of every 26.52 feature. Native 26.30–26.52 clients continue to
+use Geyser's codecs and mappings. Updating Geyser beyond the reference build
+requires repeating validation; initialization fails safely if a genuine shared
+bridge no longer exists.
 
-Recommended production policy: keep native 26.x clients, or enable only legacy
-protocols you have certified on a staging copy of your actual server. Use
-`min-protocol-id` and `blocked-protocols`; retain inventory/world backups.
+Recommended production policy: keep native current clients, or enable only the
+legacy protocols certified on a staging copy of the actual server. Use
+`min-protocol-id` and `blocked-protocols`, and retain inventory/world backups.
 
 ## Real-client acceptance checklist
 
-Run at least one client per legacy protocol family and all native families,
-with the actual Geyser/Floodgate/proxy/backend versions and plugins:
+1. Test Floodgate and online authentication separately; reconnect and confirm
+   that Floodgate/offline users never receive a Microsoft device-code prompt.
+2. Walk, sprint, jump, swim, sneak, teleport, change dimensions and mount;
+   check for rubber-banding and rejected movement.
+3. Open chest variants, move/split/shift-transfer stacks both ways, reconnect,
+   and check server-side inventory for loss, duplication or ghost items.
+4. Craft shaped and shapeless recipes manually and through the recipe book;
+   consume outputs and verify ingredient counts on the Java backend.
+5. Test furnaces, brewing, creative inventory, hotbar swaps, placement,
+   breaking, custom items and custom containers.
+6. Repeat with latency/loss, mixed client versions, resource packs, anti-cheat
+   and proxy backend switches while monitoring translation diagnostics.
 
-1. Login with Floodgate and online authentication separately; reconnect and
-   verify no device-code prompt for Floodgate/offline users.
-2. Walk/sprint/jump/swim, sneak at block edges, teleport, change dimensions,
-   mount/dismount; watch for rubber-banding and rejected movement.
-3. Open single/double/trapped chests, move/split/shift-transfer stacks in both
-   directions, close/reopen, reconnect; verify no loss/duplication/ghost items.
-4. Craft planks, sticks, crafting tables and shaped recipes manually and with
-   the recipe book; consume outputs and verify ingredient counts server-side.
-5. Use furnaces/brewing, creative inventory, hotbar swaps, block placement and
-   breaking; test custom items/containers separately.
-6. Repeat with latency/loss, multiple simultaneous mixed-version users,
-   resource packs, anti-cheat and backend switches. Inspect both client/server
-   inventories and all translation diagnostics.
-
-Sources checked on 2026-09-15:
+Sources checked on 8 October 2026:
 [official Geyser supported versions](https://geysermc.org/wiki/geyser/supported-versions/),
-[Geyser latest build metadata](https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest),
-[Floodgate latest build metadata](https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest).
-Reference Floodgate: 2.2.5 build 140 (2026-08-09); this extension does not bundle
-or replace a Floodgate server plugin.
+[Geyser build 1249 metadata](https://download.geysermc.org/v2/projects/geyser/versions/2.11.3/builds/1249),
+[Floodgate build 141 metadata](https://download.geysermc.org/v2/projects/floodgate/versions/2.2.5/builds/141).

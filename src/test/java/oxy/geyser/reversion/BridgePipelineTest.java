@@ -4,7 +4,7 @@ import io.netty.buffer.Unpooled;
 import org.cloudburstmc.math.vector.*;
 import org.cloudburstmc.protocol.bedrock.data.*;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
-import org.geysermc.geyser.network.GameProtocol;
+import org.geysermc.geyser.network.bedrock.GameProtocol;
 import org.junit.jupiter.api.*;
 import oxy.geyser.reversion.session.GeyserTranslatedUser;
 import java.util.stream.Stream;
@@ -27,7 +27,7 @@ class BridgePipelineTest {
     Stream<DynamicTest> movementCrossesBothShadingBoundaries() {
         return DuplicatedProtocolInfo.getPacketCodecs().stream().filter(c -> c.getProtocolVersion() >= 419)
                 .map(codec -> DynamicTest.dynamicTest("Geyser/Ouranos movement bridge " + codec.getProtocolVersion(), () -> {
-                    var user = new GeyserTranslatedUser(codec.getProtocolVersion(), 944, null);
+                    var user = new GeyserTranslatedUser(codec.getProtocolVersion(), 1001, null);
                     var packet = input(); var input = Unpooled.buffer(); var output = Unpooled.buffer();
                     try {
                         user.encodeClient(packet, input);

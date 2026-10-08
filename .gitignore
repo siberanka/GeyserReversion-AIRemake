@@ -2,6 +2,7 @@ build/
 .gradle/
 .idea/
 .vscode/
+ai/
 # Runtime files and credentials never belong in public source releases.
 logs/
 extensions/

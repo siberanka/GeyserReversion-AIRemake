@@ -7,7 +7,7 @@ import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.codec.BedrockCodec;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerType;
 import org.cloudburstmc.protocol.bedrock.packet.*;
-import org.geysermc.geyser.network.GameProtocol;
+import org.geysermc.geyser.network.bedrock.GameProtocol;
 import org.junit.jupiter.api.*;
 import oxy.geyser.reversion.util.BridgeCodecSelector;
 import java.util.*;
@@ -38,7 +38,7 @@ class CodecRegressionTest {
     void bridgeIsActuallySupportedByGeyser() {
         var bridge = BridgeCodecSelector.select(DuplicatedProtocolInfo.getPacketCodecs(),
                 protocol -> GameProtocol.getBedrockCodec(protocol) != null);
-        assertEquals(944, bridge.getProtocolVersion());
+        assertEquals(1001, bridge.getProtocolVersion());
         assertThrows(IllegalStateException.class, () -> BridgeCodecSelector.select(
                 DuplicatedProtocolInfo.getPacketCodecs(), protocol -> false));
         assertThrows(IllegalStateException.class, () -> BridgeCodecSelector.select(List.of(), protocol -> true));
